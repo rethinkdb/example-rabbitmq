@@ -11,7 +11,7 @@ Javascript (NodeJS).
 ## Set up RethinkDB and RabbitMQ
 
 First install RethinkDB. These examples assume the server will be
-listening on localhost on the default port 28015. 
+listening on localhost on the default port 28015.
 
 ## Installation
 
@@ -53,7 +53,8 @@ $ ./rabbit_feeder.js
 The listener script simply connects to the RabbitMQ instance and binds
 a queue to the `rethinkdb` exchange (created by the feeder script). It
 then prints out the changes coming through and what topic it received
-the message on.
+the message on. You'll want to run the listener in another window from
+the feeder:
 
 ```bash
 $ ./rabbit_listener.py
@@ -68,7 +69,8 @@ $ ./rabbit_listener.js
 This repo also contains a python script for generating random changes
 in the table the feeder scripts are subscribed to. This script isn't a
 part of the integration itself, but is useful for seeing changes
-happen in real-time.
+happen in real-time. Again, you'll want to run the generator in a
+different window from the feeder and the listener.
 
 ```bash
 $ ./change_generator.py
