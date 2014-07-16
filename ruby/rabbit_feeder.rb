@@ -28,7 +28,7 @@ end
 # Setup rabbit connection and exchange
 rabbit_conn = Bunny.new(:host => 'localhost', :port => 5672).start
 channel = rabbit_conn.create_channel
-exchange = channel.topic("rethinkdb")
+exchange = channel.topic("rethinkdb", :durable => false)
 
 # Determines whether the change is a create, delete or update
 def type_of_change(change)
@@ -42,9 +42,15 @@ def type_of_change(change)
 end
 
 # Start feeding...
-r.db('change_example').table('mytable').changes()
-  .run(rethink_conn).each do |change|
-  routing_key = "mytable.#{type_of_change change}"
-  puts "RethinkDB -( #{routing_key} )-> RabbitMQ"
-  exchange.publish(change.to_json, :routing_key => routing_key)
+table_changes = r.db('change_example').table('mytable').changes()
+
+begin
+  table_changes.run(rethink_conn).each do |change|
+    routing_key = "mytable.#{type_of_change change}"
+    puts "RethinkDB -( #{routing_key} )-> RabbitMQ"
+    exchange.publish(change.to_json, :routing_key => routing_key)
+  end
+rescue RethinkDB::RqlRuntimeError => e
+  # Table may have been dropped, connection failed etc
+  puts e.message
 end

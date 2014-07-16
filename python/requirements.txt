@@ -1,0 +1,2 @@
+rethinkdb>=1.13
+pika>=0.9.13
