@@ -8,12 +8,21 @@ your RethinkDB tables in real-time.
 This repo contains an example integration for Python, Ruby, and
 Javascript (NodeJS).
 
-## Set up RethinkDB and RabbitMQ
+## Prerequisites
 
-First install RethinkDB. These examples assume the server will be
-listening on localhost on the default port 28015.
+First, [install RethinkDB](http://rethinkdb.com/docs/install/). If you
+haven't already, you may want to have a look at the
+[quickstart guide](http://rethinkdb.com/docs/quickstart) as well.
 
-## Installation
+You'll also want to
+[install RabbitMQ](https://www.rabbitmq.com/download.html) for your
+platform.
+
+Finally, we recommend trying these out inside a
+[virtualenv](virtualenv.readthedocs.com) if you're using Python, and
+an [rvm gemset](https://rvm.io/) if you're using Ruby.
+
+## Dependencies
 
 Each script has two dependencies, the RethinkDB client and a library
 for interacting with RabbitMQ in that language. For Python that's
