@@ -4,7 +4,7 @@ Example code for connecting RethinkDB change feeds into RabbitMQ topic
 exchanges.
 
 This repo contains an example integration for Python, Ruby, and
-Javascript (NodeJS).
+JavaScript (NodeJS).
 
 ## Prerequisites
 
