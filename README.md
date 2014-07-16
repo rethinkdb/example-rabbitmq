@@ -82,6 +82,5 @@ happen in real-time. Again, you'll want to run the generator in a
 different window from the feeder and the listener.
 
 ```bash
-$ cd .. # back to top level
 $ ./change_generator.py
 ```
