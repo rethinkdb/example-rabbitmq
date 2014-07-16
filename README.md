@@ -1,9 +1,7 @@
-# Example RethinkDB integration with RabbitMQ #
+# Integrating RethinkDB with RabbitMQ #
 
-This repo gives example code that can be used to connect RethinDB
-change feeds into RabbitMQ topic exchanges. The idea being that you
-can use RabbitMQ's publish/subscribe features to listen to changes on
-your RethinkDB tables in real-time.
+Example code for connecting RethinkDB change feeds into RabbitMQ topic
+exchanges.
 
 This repo contains an example integration for Python, Ruby, and
 Javascript (NodeJS).
@@ -33,11 +31,13 @@ amqp.node).
 
 ```bash
 $ git clone http://github.com/rethinkdb/example-rabbitmq
-$ cd example-rabbitmq
+$ cd example-rabbitmq/python
 $ pip install -r requirements.txt
 # or
+$ cd example-rabbitmq/ruby
 $ bundler install
 # or
+$ cd example-rabbitmq/javascript
 $ npm install .
 ```
 
@@ -82,5 +82,6 @@ happen in real-time. Again, you'll want to run the generator in a
 different window from the feeder and the listener.
 
 ```bash
+$ cd .. # back to top level
 $ ./change_generator.py
 ```
