@@ -1,5 +1,5 @@
 # A sample Gemfile
 source "https://rubygems.org"
 
-gem "rethinkdb"
-gem "bunny"
+gem "rethinkdb", ">=1.13"
+gem "bunny", ">=1.3.1"
