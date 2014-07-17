@@ -42,9 +42,15 @@ def type_of_change(change)
 end
 
 # Start feeding...
-r.db('change_example').table('mytable').changes()
-  .run(rethink_conn).each do |change|
-  routing_key = "mytable.#{type_of_change change}"
-  puts "RethinkDB -( #{routing_key} )-> RabbitMQ"
-  exchange.publish(change.to_json, :routing_key => routing_key)
+table_changes = r.db('change_example').table('mytable').changes()
+
+begin
+  table_changes.run(rethink_conn).each do |change|
+    routing_key = "mytable.#{type_of_change change}"
+    puts "RethinkDB -( #{routing_key} )-> RabbitMQ"
+    exchange.publish(change.to_json, :routing_key => routing_key)
+  end
+rescue RethinkDB::RqlRuntimeError => e
+  # Table may have been dropped, connection failed etc
+  puts e.message
 end

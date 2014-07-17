@@ -1,50 +1,64 @@
 #!/usr/bin/env node
 
-r = require('rethinkdb');
-amqp = require('amqplib');
+var r = require('rethinkdb');
+var amqp = require('amqplib');
 
-var rethink_conn = null;
-var rabbit_conn = null;
-var channel = null;
+var rethinkConn;
+var rabbitConn;
+var channel;
 var exchange = 'rethinkdb';
 
 
 r.connect({host: 'localhost', port: 28015}).then(function(conn) {
     // Setup RethinkDB connection
-    rethink_conn = conn;
-    return conn;
-}).finally(function createDB(){
+    rethinkConn = conn;
+}).catch(r.Error.RqlDriverError, function(err){
+    console.log(err.message);
+    process.exit(1);
+}).then(function createDB(){
     // Ensure database exists for this example
-    return r.dbCreate('change_example').run(rethink_conn);
+    return r.dbCreate('change_example').run(rethinkConn);
 }).finally(function createTable(){
     // Ensure table exists for this example
-    return r.db('change_example').tableCreate('mytable').run(rethink_conn)
+    return r.db('change_example').tableCreate('mytable').run(rethinkConn);
 }
-// ignore db/table exists error
+// We ignore db/table exists errors here because amqplib uses a
+// different promise library from rethinkdb, and the error doesn't
+// propagate correctly from one to the other.
 ).catch(r.Error.RqlRuntimeError, function(){}
 ).then(function(){
     // Setup rabbit connection
     return amqp.connect('amqp://localhost:5672');
 }).then(function(conn){
-    rabbit_conn = conn;
+    rabbitConn = conn;
     // Setup rabbit channel
-    return rabbit_conn.createChannel();
+    return rabbitConn.createChannel();
 }).then(function(ch){
     channel = ch;
     // Setup rabbit exchange
     return channel.assertExchange(exchange, 'topic', {durable: false});
 }).then(function(){
     // Listen for changes on our table
-    return r.db('change_example').table('mytable').changes().run(rethink_conn);
-}).then(function(change_cursor){
+    return r.db('change_example').table('mytable').changes().run(rethinkConn);
+}).then(function(changeCursor){
     // Feed changes into rabbit
-    change_cursor.each(function(error, change){
-        var routingKey = 'mytable.' + typeOfChange(change);
-        console.log('RethinkDB -(', routingKey, ')-> RabbitMQ')
-        channel.publish(
-            exchange, routingKey, new Buffer(JSON.stringify(change)));
-    })
-})
+    changeCursor.each(function(err, change){
+        if(err == undefined){
+            var routingKey = 'mytable.' + typeOfChange(change);
+            console.log('RethinkDB -(', routingKey, ')-> RabbitMQ')
+            channel.publish(
+                exchange, routingKey, new Buffer(JSON.stringify(change)));
+        }else{
+            // The table may have been deleted, or possibly connection issues
+            console.log('A problem reading from RethinkDB cursor:');
+            console.log(err.msg);
+            process.exit(1);
+        }
+    });
+}).catch(function(err){
+    console.log(err.message);
+    process.exit(1);
+});
 
 function typeOfChange(change) {
     // Determines whether the change is a create, delete or update

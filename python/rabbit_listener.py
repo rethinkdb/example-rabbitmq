@@ -9,7 +9,7 @@ rabbit_conn = pika.BlockingConnection(
 )
 exchange = 'rethinkdb'
 channel = rabbit_conn.channel()
-channel.exchange_declare(exchange=exchange, type='topic', durable=False)
+channel.exchange_declare(exchange, exchange_type='topic', durable=False)
 queue = channel.queue_declare(exclusive=True).method.queue
 
 # Bind to all changes on the 'mytable' topic
@@ -20,16 +20,7 @@ print 'Started listening...'
 
 for method, properties, payload in channel.consume(queue):
     change = json.loads(payload)
-    change_typ = method.routing_key.split('.')[1]
-    print 'RabbitMQ -(', method.routing_key, ')-> Listener'
-    if change_typ == 'create':
-        print json.dumps(change['new_val'], indent=True, sort_keys=True)
-    elif change_typ == 'delete':
-        print json.dumps(change['old_val'], indent=True, sort_keys=True)
-    else:
-        print 'Old value:'
-        print json.dumps(change['old_val'], indent=True, sort_keys=True)
-        print 'New value:'
-        print json.dumps(change['new_val'], indent=True, sort_keys=True)
+    tablename, change_type = method.routing_key.split('.')
+    print tablename, ' -> RabbitMQ -(', method.routing_key, ')-> Listener'
+    print json.dumps(change, indent=True, sort_keys=True)
     print '='*80, '\n'
-    

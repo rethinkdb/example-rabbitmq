@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 
-amqp = require('amqplib');
+var amqp = require('amqplib');
 
 // Setup the rabbit connection
 
-var rabbit_conn = null;
-var channel = null;
+var rabbitConn;
+var channel;
 var exchange = 'rethinkdb';
-var queue = null;
+var queue;
 
 // Create the rabbit connection
 amqp.connect('amqp://localhost:5672').then(function(conn){
-    rabbit_conn = conn;
+    rabbitConn = conn;
     // Create the rabbit channel
-    return rabbit_conn.createChannel();
+    return rabbitConn.createChannel();
 }).then(function(ch){
     channel = ch;
     // Create the exchange (or do nothing if it exists)
@@ -29,23 +29,12 @@ amqp.connect('amqp://localhost:5672').then(function(conn){
     console.log('Started listening...');
     channel.consume(queue, function(msg){
         // Handle each message as it comes in from RabbitMQ
-        change = JSON.parse(msg.content);
-        console.log('RabbitMQ -(', msg.fields.routingKey, ')-> Listener');
-        switch (msg.fields.routingKey.split('.')[1]){
-            case 'create':
-              console.log(JSON.stringify(change.new_val, undefined, 2));
-              break;
-            case 'delete':
-              console.log(JSON.stringify(change.old_val, undefined, 2));
-             break;
-            case 'update':
-              console.log('Old value:');
-              console.log(JSON.stringify(change.old_val, undefined, 2));
-              console.log('New value:');
-              console.log(JSON.stringify(change.new_val, undefined, 2));
-            break;
-        }
+        var change = JSON.parse(msg.content);
+        var tablename = msg.fields.routingKey.split('.');
+        var changeType = msg.fields.routingKey.split('.');
+        console.log(tablename, '-> RabbitMQ -(',
+                    msg.fields.routingKey, ')-> Listener');
+        console.log(JSON.stringify(change, undefined, 2));
         console.log(new Array(81).join('=') + '\n')
-
     })
 })
