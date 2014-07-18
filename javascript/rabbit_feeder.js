@@ -22,10 +22,11 @@ r.connect({host: 'localhost', port: 28015}).then(function(conn) {
     // Ensure table exists for this example
     return r.db('change_example').tableCreate('mytable').run(rethinkConn);
 }
-// We ignore db/table exists errors here because amqplib uses a
-// different promise library from rethinkdb, and the error doesn't
-// propagate correctly from one to the other.
-).catch(r.Error.RqlRuntimeError, function(){}
+).catch(r.Error.RqlRuntimeError, function(){
+    // We ignore db/table exists errors here because amqplib uses a
+    // different promise library from rethinkdb, and the error doesn't
+    // propagate correctly from one to the other.
+}
 ).then(function(){
     // Setup rabbit connection
     return amqp.connect('amqp://localhost:5672');
@@ -43,17 +44,16 @@ r.connect({host: 'localhost', port: 28015}).then(function(conn) {
 }).then(function(changeCursor){
     // Feed changes into rabbit
     changeCursor.each(function(err, change){
-        if(err == undefined){
-            var routingKey = 'mytable.' + typeOfChange(change);
-            console.log('RethinkDB -(', routingKey, ')-> RabbitMQ')
-            channel.publish(
-                exchange, routingKey, new Buffer(JSON.stringify(change)));
-        }else{
+        if(err){
             // The table may have been deleted, or possibly connection issues
             console.log('A problem reading from RethinkDB cursor:');
             console.log(err.msg);
             process.exit(1);
         }
+        var routingKey = 'mytable.' + typeOfChange(change);
+        console.log('RethinkDB -(', routingKey, ')-> RabbitMQ')
+        channel.publish(
+            exchange, routingKey, new Buffer(JSON.stringify(change)));
     });
 }).catch(function(err){
     console.log(err.message);

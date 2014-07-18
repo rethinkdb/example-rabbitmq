@@ -31,7 +31,6 @@ amqp.connect('amqp://localhost:5672').then(function(conn){
         // Handle each message as it comes in from RabbitMQ
         var change = JSON.parse(msg.content);
         var tablename = msg.fields.routingKey.split('.');
-        var changeType = msg.fields.routingKey.split('.');
         console.log(tablename, '-> RabbitMQ -(',
                     msg.fields.routingKey, ')-> Listener');
         console.log(JSON.stringify(change, undefined, 2));

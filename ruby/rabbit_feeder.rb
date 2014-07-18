@@ -28,7 +28,7 @@ end
 # Setup rabbit connection and exchange
 rabbit_conn = Bunny.new(:host => 'localhost', :port => 5672).start
 channel = rabbit_conn.create_channel
-exchange = channel.topic("rethinkdb")
+exchange = channel.topic("rethinkdb", :durable => false)
 
 # Determines whether the change is a create, delete or update
 def type_of_change(change)

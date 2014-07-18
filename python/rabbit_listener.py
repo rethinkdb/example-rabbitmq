@@ -20,7 +20,7 @@ print 'Started listening...'
 
 for method, properties, payload in channel.consume(queue):
     change = json.loads(payload)
-    tablename, change_type = method.routing_key.split('.')
+    tablename = method.routing_key.split('.')[0]
     print tablename, ' -> RabbitMQ -(', method.routing_key, ')-> Listener'
     print json.dumps(change, indent=True, sort_keys=True)
     print '='*80, '\n'

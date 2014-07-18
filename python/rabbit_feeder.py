@@ -29,7 +29,7 @@ rabbit_conn = pika.BlockingConnection(
 )
 exchange = 'rethinkdb'
 channel = rabbit_conn.channel()
-channel.exchange_declare(exchange=exchange, type='topic')
+channel.exchange_declare(exchange, exchange_type='topic', durable=False)
     
 
 def type_of_change(change):
