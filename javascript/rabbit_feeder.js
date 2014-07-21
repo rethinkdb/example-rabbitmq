@@ -21,13 +21,11 @@ r.connect({host: 'localhost', port: 28015}).then(function(conn) {
 }).finally(function createTable(){
     // Ensure table exists for this example
     return r.db('change_example').tableCreate('mytable').run(rethinkConn);
-}
-).catch(r.Error.RqlRuntimeError, function(){
+}).catch(r.Error.RqlRuntimeError, function(){
     // We ignore db/table exists errors here because amqplib uses a
     // different promise library from rethinkdb, and the error doesn't
     // propagate correctly from one to the other.
-}
-).then(function(){
+}).then(function(){
     // Setup rabbit connection
     return amqp.connect('amqp://localhost:5672');
 }).then(function(conn){
