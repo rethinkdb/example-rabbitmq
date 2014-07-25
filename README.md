@@ -6,6 +6,11 @@ exchanges.
 This repo contains an example integration for Python, Ruby, and
 JavaScript (NodeJS).
 
+You can find a tutorial on the techniques behind these examples in
+[javascript](http://rethinkdb.com/docs/rabbitmq/javascript/),
+[python](http://rethinkdb.com/docs/rabbitmq/python/) and
+[ruby](http://rethinkdb.com/docs/rabbitmq/ruby/)
+
 ## Prerequisites
 
 First, [install RethinkDB](http://rethinkdb.com/docs/install/). If you
