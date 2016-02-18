@@ -44,7 +44,7 @@ def type_of_change(change):
 # Start feeding...
 table_changes = r.db('change_example').table('mytable').changes()
 try:
-    for change in change_query.run(rethink_conn):
+    for change in table_changes.run(rethink_conn):
         routing_key = 'mytable.' + type_of_change(change)
         print 'RethinkDB -(', routing_key, ')-> RabbitMQ'
         channel.basic_publish(exchange, routing_key, json.dumps(change))
